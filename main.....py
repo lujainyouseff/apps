@@ -68,8 +68,8 @@ page_bg_img = """
 
 /* Text input boxes and file upload buttons */
 [data-testid="stTextInput"] {
-  background-color: rgba(0, 0, 0, 0);  /* Fully transparent background */
-  color: white;  /* Text color */
+  background-color: rgba(0, 0, 0, 0);  
+  color: white;  
   border: 1px solid rgba(0, 0, 0, 0);  /* Border with full transparency */
   backdrop-filter: blur(2px);  /* Blur effect */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Box shadow */
@@ -159,7 +159,6 @@ with st.expander('Analyze Text'):
         # Display the results
         st.write('DistilBERT Output: ', round(distil_output[0]['score'], 3), 'DistilBERT Label:',
                  distil_output[0]['label'])
-        #st.write('BERT Output: ', round(bert_output[0]['score'], 3), 'BERT Label: ', bert_output[0]['label'])
 
         # Determine the label based on sentiment analysis
         sentiment_label = distil_output[0]['label']
@@ -179,7 +178,6 @@ with st.expander('Analyze Text'):
 
         st.write('DistilBERT Output: ', round(distil_output[0]['score'], 3), 'DistilBERT Label:',
                  distil_output[0]['label'])
-        #st.write('BERT Output: ', round(bert_output[0]['score'], 3), 'BERT Label: ', bert_output[0]['label'])
 
         # Determine the label based on sentiment analysis
         sentiment_label = distil_output[0]['label']
@@ -253,13 +251,6 @@ with st.expander('Analyze CSV'):
             )
         else:
             st.error("The uploaded CSV does not contain a 'Reviews' column.")
-
-
-import streamlit as st
-from PIL import Image
-import requests
-from io import BytesIO
-from transformers import pipeline
 # Streamlit app code
 # Function to get VQA result
 def get_vqa_result(image):
