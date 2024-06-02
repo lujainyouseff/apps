@@ -275,25 +275,37 @@ with st.expander('Analyze Image'):
     if uploaded_file is not None:
         # Read image from uploaded file
         img = Image.open(uploaded_file)
+        # Get VQA result
+        result = get_vqa_result(img)
+
+        # Calculate 'yes' and 'no' scores
+        yes_score = next((res['score'] for res in result if res['answer'] == 'yes'), 0)
+        no_score = next((res['score'] for res in result if res['answer'] == 'no'), 0)
+
+        # Display the appropriate image based on the scores
+        if yes_score > no_score:
+            st.image(positive_image_url, caption="positive", width=100)
+        else:
+            st.image(negative_image_url, caption="negative", width=100)
+
+        st.write("Result:", result)
     elif image_url:
         # Get image from URL
         response = requests.get(image_url)
         img = Image.open(BytesIO(response.content))
+        result = get_vqa_result(img)
+
+        # Calculate 'yes' and 'no' scores
+        yes_score = next((res['score'] for res in result if res['answer'] == 'yes'), 0)
+        no_score = next((res['score'] for res in result if res['answer'] == 'no'), 0)
+
+        # Display the appropriate image based on the scores
+        if yes_score > no_score:
+            st.image(positive_image_url, caption="positive", width=100)
+        else:
+            st.image(negative_image_url, caption="negative", width=100)
+
+        st.write("Result:", result)
     else:
         st.warning("Please upload an image or provide an image URL.")
         st.stop()
-
-    # Get VQA result
-    result = get_vqa_result(img)
-
-    # Calculate 'yes' and 'no' scores
-    yes_score = next((res['score'] for res in result if res['answer'] == 'yes'), 0)
-    no_score = next((res['score'] for res in result if res['answer'] == 'no'), 0)
-
-    # Display the appropriate image based on the scores
-    if yes_score > no_score:
-        st.image(positive_image_url, caption="positive", width=100)
-    else:
-        st.image(negative_image_url, caption="negative", width=100)
-
-    st.write("Result:", result)
