@@ -58,12 +58,12 @@ watchdog==3.0.0
 webencodings==0.5.1
 yfinance==0.2.33
 zipp==3.17.0
-streamlit==1.29.0
+streamlit
 transformers
 cleantext
 pandas
 requests
 pillow
 torch
-tensorflow==2.11.0
-keras==2.11.0
+tensorflow==2.15.0
+keras==2.15.0
