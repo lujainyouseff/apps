@@ -64,4 +64,5 @@ cleantext
 pandas
 requests
 pillow
-
+torch
+tensorflow
