@@ -1,175 +1,115 @@
-import streamlit as st
-from transformers import pipeline
-import cleantext
 import pandas as pd
+import streamlit as st
+import pandas as pd
+import streamlit as st
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
+import io
 
-# CSS for background images and custom styles
+
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {   
-  background-image: url("https://i.pinimg.com/originals/e5/1d/7f/e51d7f568c7234b292427e817501d8f2.jpg");
-  background-size: contain;
+  background-image: url("https://i.ibb.co/L884RFs/Untitled-design-38.png");
+  background-size: auto 70%;
   background-repeat: no-repeat;
-  background-position: top right;
+  background-position: right;
   background-color: black;
-}
-[data-testid="stHeader"] {
-  background-color: rgba(0,0,0,0);
-}
-[data-testid="stToolbar"] {
-  right: 2rem;
-}
-[data-testid="stSidebar"]::before {
-  content: "";
-  background-image: url("https://i.ibb.co/XDdDb2g/ezgif-com-gif-maker-1.gif");
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  opacity: 0.5;
-  z-index: 0;
-}
-[data-testid="stSidebar"]::after {
-  content: "";
-  background-color: #EEEEEE;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: -1;
-}
-[data-testid="stExpander"] {
-  background: url("https://i.pinimg.com/originals/e5/1d/7f/e51d7f568c7234b292427e817501d8f2.jpg");
-  background-size: auto 150%;
-  background-repeat: no-repeat;
-  background-position: top right;
-  background-color: black;
-}
-#custom-header {
-  color: #C73659; 
-  font-size: 20px; 
-}
-#custom-header_2 {
-  color: #C73659; 
-  font-size: 20px; 
-}
-
-#custom-header_3 {
-  color: #C73659; 
-  font-size: 20px; 
 }
 </style>
 """
-# Inject CSS with markdown
 st.markdown(page_bg_img, unsafe_allow_html=True)
-# Streamlit headers
-st.header('Reviews Sentiment Analysis ')
-st.sidebar.markdown('<h2 id="custom-header">Lujain Yousef. </h2>', unsafe_allow_html=True)
-st.sidebar.markdown('<h2 id="custom-header_2">Data Science Student. </h2>', unsafe_allow_html=True)
-st.sidebar.markdown('<h2 id="custom-header_3">Sentiment Analysis Project. </h2>', unsafe_allow_html=True)
-# First expander for text analysis
-with st.expander('Analyze Text'):
-    text = st.text_input('Text here: ')
-    if text:
-        # Create the pipeline for DistilBERT
-        distil_pipeline = pipeline(task="sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-        distil_output = distil_pipeline(text)
+# Streamlit app title
+st.write("""
+# Pokémon Dataset Analysis
+Upload a dataset and adjust the parameters to predict if a Pokémon is Legendary or not.
+""")
 
-        # Create the pipeline for BERT with from_pt=True
-        bert_pipeline = pipeline(task="sentiment-analysis", model="kwang123/bert-sentiment-analysis")
-        bert_output = bert_pipeline(text)
-
-        # Display the results
-        st.write('DistilBERT Output: ', round(distil_output[0]['score'], 3),'DistilBERT Label:',distil_output[0]['label'])
-        st.write('BERT Output: ', round(bert_output[0]['score'], 3),'BERT Label: ',bert_output[0]['label'])
-
-    # Text input for cleaning text
-    pre = st.text_input('Clean Text: ')
-    if pre:
-        cleaned_text = cleantext.clean(pre, clean_all=False, extra_spaces=True,
-                                       stopwords=True, lowercase=True, numbers=True, punct=True)
-        st.write('Cleaned Text: ', cleaned_text)
-
-        distil_pipeline = pipeline(task="sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
-        distil_output = distil_pipeline(cleaned_text)
-
-        # Create the pipeline for BERT with from_pt=True
-        bert_pipeline = pipeline(task="sentiment-analysis", model="kwang123/bert-sentiment-analysis")
-        bert_output = bert_pipeline(cleaned_text)
-
-        st.write('DistilBERT Output: ', round(distil_output[0]['score'], 3), 'DistilBERT Label:',
-                 distil_output[0]['label'])
-        st.write('BERT Output: ', round(bert_output[0]['score'], 3), 'BERT Label: ', bert_output[0]['label'])
+# Sidebar for user input parameters
+st.sidebar.header('User Input Parameters')
 
 
-@st.cache_resource
-def load_sentiment_pipeline():
-    sentiment_pipeline_multilingual = pipeline(task="sentiment-analysis", model='nlptown/bert-base-multilingual-uncased-sentiment')
-    return  sentiment_pipeline_multilingual
-
-# Cache the text cleaning function
-@st.cache_data
-def clean_text(text):
-    return cleantext.clean(text, clean_all=False, extra_spaces=True, stopwords=True, lowercase=True, numbers=True, punct=True)
-
-# Function to get sentiment score
-def get_score(text, sentiment_pipeline_multilingual):
-    cleaned_text = clean_text(text)
-    result = sentiment_pipeline_multilingual(cleaned_text)
-    return result[0]['score']
-
-# Function to get sentiment label
-def get_label(text, sentiment_pipeline):
-    cleaned_text = clean_text(text)
-    result = sentiment_pipeline(cleaned_text)
-
-    # Map the original labels to the new labels
-    label_mapping = {
-        '1 star':  '⭐',
-        '2 stars': '⭐⭐',
-        '3 stars': '⭐⭐⭐',
-        '4 stars': '⭐⭐⭐⭐',
-        '5 stars': '⭐⭐⭐⭐⭐'
+def user_input_features():
+    total = st.sidebar.slider('Total', 180, 780, 318)
+    hp = st.sidebar.slider('HP', 1, 255, 45)
+    attack = st.sidebar.slider('Attack', 5, 190, 49)
+    defense = st.sidebar.slider('Defense', 5, 230, 49)
+    sp_atk = st.sidebar.slider('Sp. Atk', 10, 194, 65)
+    sp_def = st.sidebar.slider('Sp. Def', 20, 230, 65)
+    speed = st.sidebar.slider('Speed', 5, 180, 45)
+    generation = st.sidebar.slider('Generation', 1, 6, 1)
+    data = {
+        'Total': total,
+        'HP': hp,
+        'Attack': attack,
+        'Defense': defense,
+        'Sp. Atk': sp_atk,
+        'Sp. Def': sp_def,
+        'Speed': speed,
+        'Generation': generation
     }
+    features = pd.DataFrame(data, index=[0])
+    return features
 
-    result[0]['label'] = label_mapping.get(result[0]['label'], result[0]['label'])
-    return result[0]['label']
 
-with st.expander('Analyze CSV'):
-    upl = st.file_uploader('Upload file', type=['csv'])
+df = user_input_features()
 
-    if upl is not None:
-        df = pd.read_csv(upl)
+st.subheader('User Input Parameters')
+st.write(df)
 
-        # Assuming the CSV has a column named 'Reviews' for analysis
-        if 'Reviews' in df.columns:
-            sentiment_pipeline_multilingual = load_sentiment_pipeline()
+# File uploader for dataset
+upl = st.file_uploader('Upload Pokémon dataset (CSV)', type=['csv'])
 
-            df['score'] = df['Reviews'].apply(lambda x: get_score(x, sentiment_pipeline_multilingual))
-            df['label'] = df['Reviews'].apply(lambda x: get_label(x, sentiment_pipeline_multilingual))
+if upl is not None:
+    target = pd.read_csv(upl)
+    st.write('Dataset:')
+    st.write(target.head())
 
-            st.write(df.head(100))
+    # Ensure the necessary columns are present
+    required_columns = ['Total', 'HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed', 'Generation', 'Legendary']
+    if all(col in target.columns for col in required_columns):
 
-            # Function to convert dataframe to CSV
-            @st.cache_data
-            def convert_df(df):
-                return df.to_csv(index=False).encode('utf-8')
+        # Separate features and target
+        X = target[required_columns[:-1]]
+        y = target['Legendary'].astype(int)  # Convert boolean to integer for compatibility
 
-            csv = convert_df(df)
+        # Split data into training and test sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-            st.download_button(
-                label='Download data as CSV',
-                data=csv,
-                file_name='sentiment.csv',
-                mime='text/csv',
-            )
-        else:
-            st.error("The uploaded CSV does not contain a 'Reviews' column.")
+        # Build the pipeline
+        pipe = Pipeline([
+            ('scaler', StandardScaler()),
+            ('reducer', PCA(n_components=0.9)),
+            ('classifier', RandomForestClassifier(random_state=42))
+        ])
 
+        # Fit the pipeline to the training data
+        pipe.fit(X_train, y_train)
+
+        # Evaluate the model
+        accuracy = pipe.score(X_test, y_test)
+        st.write(f'Accuracy on the test set: {accuracy:.1%}')
+
+        # Make predictions on the user input features
+        prediction = pipe.predict(df)
+        prediction_proba = pipe.predict_proba(df)
+
+        # Display prediction results
+        st.subheader('Prediction')
+        st.write('Legendary' if prediction[0] == 1 else 'Not Legendary')
+
+        st.subheader('Prediction Probability')
+        st.write(prediction_proba)
+
+        # Add predictions to the original DataFrame
+        target['Prediction'] = pipe.predict(X)
+
+    else:
+        st.error(f"Please ensure your CSV file contains the following columns: {', '.join(required_columns)}")
+else:
+    st.write("Please upload a CSV file to proceed.")
 
 
